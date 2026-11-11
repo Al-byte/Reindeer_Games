@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Reindeer in side profile</title>
+  <rect width="64" height="64" rx="14" fill="#0a211e"/>
+  <!-- Branching antlers above the right-facing head. -->
+  <g fill="none" stroke="#e9c783" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M32 29 26 20 25 7 M26 18 17 13 14 7 M25 12 31 7"/>
+    <path d="M36 27 38 18 35 8 M38 19 46 13 47 7 M43 15 42 8"/>
+  </g>
+  <!-- Ear, head, muzzle, and sweeping neck silhouette. -->
+  <path fill="#e9c783" d="M30 30C24 29 19 25 17 21 25 20 30 23 33 27L39 25C44 25 47 29 48 33L56 36Q59 38 56 42L45 44C40 46 39 51 40 57H17C24 49 27 41 28 35Z"/>
+  <circle cx="42" cy="33" r="2" fill="#0a211e"/>
+  <path d="M54 36 57 37Q59 39 56 41L53 40Z" fill="#a83124"/>
+</svg>

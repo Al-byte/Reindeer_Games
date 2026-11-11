@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0a211e">
+<title>Reindeer Games</title>
+<link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+<!-- Small responsive fallback for local/offline preview; Bootstrap takes precedence when available. -->
+<style>
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0}
+.container-fluid{width:100%;margin-inline:auto}
+.mx-auto{margin-inline:auto!important}.text-center{text-align:center!important}
+.row{display:flex;flex-wrap:wrap;margin:-.375rem}.row>*{flex-shrink:0;width:100%;max-width:100%;padding:.375rem}
+.row-cols-2>*{flex:0 0 auto;width:50%}
+.d-flex{display:flex!important}.flex-wrap{flex-wrap:wrap!important}.justify-content-center{justify-content:center!important}
+.gap-2{gap:.5rem!important}.mt-4{margin-top:1.5rem!important}.mb-0{margin-bottom:0!important}
+.p-3{padding:1rem!important}.py-3{padding-block:1rem!important}.px-2{padding-inline:.5rem!important}
+@media(min-width:576px){.row-cols-sm-4>*{width:25%}.p-sm-4{padding:1.5rem!important}.px-sm-3{padding-inline:1rem!important}.gap-sm-3{gap:1rem!important}}
+@media(min-width:768px){.py-md-5{padding-block:3rem!important}.g-md-3{margin:-.5rem}.g-md-3>*{padding:.5rem}}
+@media(min-width:992px){.p-lg-5{padding:3rem!important}.px-lg-4{padding-inline:1.5rem!important}}
+</style>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+<style>
+/* Christmas theme; layout and spacing use Bootstrap 5 grid/utilities. */
+.reindeer-page{--cream:#fff5dc;--muted:#c2d1cb;--gold:#e9c783;--panel:#102f29;min-height:100vh;min-height:100dvh;background:radial-gradient(ellipse at 50% -20%,#173f33 0%,#061713 75%);color:var(--cream);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.reindeer-page .page-shell{max-width:1120px}
+.reindeer-lock{max-width:800px;background:radial-gradient(ellipse at top,#21483b,#0a211e 70%);color:var(--cream);border:1px solid #426253;border-radius:24px;box-shadow:0 20px 70px #0004}
+.reindeer-lock .eyebrow{color:var(--gold);font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;margin:0 0 12px}
+.reindeer-lock h1{color:var(--cream);font:normal clamp(2rem,6vw,3.2rem)/1.12 Georgia,serif;margin:0 0 16px}
+.reindeer-lock .intro{max-width:480px;margin:0 auto;color:var(--muted);font-size:clamp(.95rem,2.5vw,1rem)}
+.reindeer-lock .slots{list-style:none;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0}
+.reindeer-lock .slot{min-width:0;min-height:56px;display:flex;align-items:center;justify-content:center;background:#071b18;border:1px solid #50685a;border-radius:10px;color:#b8c9c2;font-size:.8rem}
+.reindeer-lock .slot.filled{color:var(--gold);border-color:var(--gold)}
+.reindeer-lock .slot img{width:min(65%,40px);height:40px;object-fit:contain}
+.reindeer-lock .status{min-height:3em;margin:16px 0;color:var(--muted);font-size:clamp(.9rem,2.6vw,1rem)}
+.reindeer-lock .status.error{color:#ffc5b8}.reindeer-lock .status.success{color:#e9c783}
+.reindeer-lock .keypad{margin-top:0}
+.reindeer-lock button,.reindeer-lock .continue{font:inherit;cursor:pointer}
+.reindeer-lock .key{width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:14px 6px;background:linear-gradient(150deg,#23493c,#15372e);border:1px solid #54705a;color:var(--cream);border-radius:14px;min-height:122px;transition:background .15s,transform .15s}
+.reindeer-lock .key:hover:enabled{background:#315b49;transform:translateY(-2px)}
+.reindeer-lock .key img{height:56px;width:56px;max-width:80%;object-fit:contain}
+.reindeer-lock .key img,.reindeer-lock .slot img{filter:brightness(0) saturate(100%) invert(87%) sepia(27%) saturate(716%) hue-rotate(339deg) brightness(96%) contrast(90%)}
+.reindeer-lock .icon-fallback{display:grid;place-items:center;width:55px;height:55px;color:var(--gold);font:40px Georgia,serif}
+.reindeer-lock .slot .icon-fallback{width:34px;height:34px;font-size:25px}
+.reindeer-lock .key span:last-child{font-size:.88rem;line-height:1.25}
+.reindeer-lock :focus-visible{outline:3px solid #ffe3a5;outline-offset:3px}
+.reindeer-lock button:disabled{opacity:.5;cursor:default}
+.reindeer-lock .actions button,.reindeer-lock .continue{display:inline-flex;align-items:center;justify-content:center;padding:10px 17px;border-radius:9px;border:1px solid #688270;background:transparent;color:var(--cream);min-height:44px;line-height:1.35;text-decoration:none}
+.reindeer-lock .actions button:hover:enabled{background:#315b49;color:var(--cream)}
+.reindeer-lock .continue{background:var(--gold);color:#152a22;border-color:var(--gold);font-weight:650}
+.reindeer-lock .continue:hover{background:#ffe0a2;color:#152a22}
+.reindeer-lock .success-modal{width:min(420px,calc(100% - 32px));padding:32px 24px;border:1px solid var(--gold);border-radius:20px;background:#102f29;color:var(--cream);text-align:center;box-shadow:0 20px 70px #0008}
+.reindeer-lock .success-modal::backdrop{background:#000a}
+.reindeer-lock .success-modal h2{font:normal 2rem Georgia,serif;margin:0 0 24px}
+.initialization-progress{width:100%;height:20px;accent-color:#e9c783}
+.reindeer-lock .video-modal{position:fixed;inset:0;width:100vw;max-width:none;height:100dvh;max-height:none;margin:0;padding:0;border:0;background:#000;color:#fff}
+.video-modal::backdrop{background:#000}
+.video-modal video{display:block;width:100%;height:100%;object-fit:contain;background:#000}
+.video-controls{position:absolute;top:16px;right:16px;display:flex;gap:10px;z-index:1}
+.video-controls button{background:#102f29;color:#fff5dc;border:1px solid #e9c783;border-radius:8px;padding:10px 16px;min-height:44px}
+.video-notice{position:absolute;left:16px;bottom:70px;max-width:calc(100% - 32px);background:#102f29;color:#fff5dc;padding:12px;border-radius:8px}
+.reindeer-lock [hidden]{display:none!important}
+.reindeer-lock .footnote{font-size:.78rem;color:var(--muted);margin:24px 0 0}
+@media(min-width:576px){.reindeer-lock .slots{grid-template-columns:repeat(8,minmax(0,1fr))}.reindeer-lock .slot{min-height:64px}}
+@media(max-width:575.98px){.reindeer-lock{border-radius:17px}.reindeer-lock .key{min-height:114px;padding:12px 4px}.reindeer-lock .key img{height:49px;width:49px}.reindeer-lock .status{margin:14px 0}.reindeer-lock .footnote{margin-top:18px}.reindeer-lock .actions button{flex:1 1 auto;min-width:85px}}
+@media(max-width:359.98px){.reindeer-lock .key{min-height:105px}.reindeer-lock .slot{min-height:48px}.reindeer-lock .slot img{height:32px}.reindeer-lock .actions button{padding-inline:10px;font-size:.88rem}}
+@media(prefers-reduced-motion:reduce){.reindeer-lock .key{transition:none}.reindeer-lock .key:hover:enabled{transform:none}}
+</style>
+</head>
+<body class="reindeer-page">
+<div class="container-fluid page-shell px-2 px-sm-3 px-lg-4 py-3 py-md-5">
+ <main class="reindeer-lock mx-auto p-3 p-sm-4 p-lg-5" id="reindeer-lock" aria-labelledby="lock-title">
+  <header class="text-center">
+   <p class="eyebrow">North Pole • Sleigh dispatch</p>
+   <h1 id="lock-title">Reindeer Games</h1>
+   <p class="intro">Eight reindeer. One secret order.<br>Follow your clues and select the symbols to open the way.</p>
+  </header>
+  <ol class="slots mt-4" aria-label="Your eight-symbol sequence" id="lock-slots"></ol>
+  <p class="status text-center" id="lock-status" role="status" aria-live="polite" aria-atomic="true">Select the first symbol to begin.</p>
+  <div class="keypad row row-cols-2 row-cols-sm-4 g-2 g-md-3" id="lock-keypad" role="group" aria-label="Reindeer picture keypad"></div>
+  <div class="actions d-flex flex-wrap justify-content-center gap-2 gap-sm-3 mt-4">
+   <button type="button" class="btn" id="lock-undo">Undo</button>
+   <button type="button" class="btn" id="lock-clear">Clear</button>
+   <button type="button" class="btn" id="lock-reset">Reset puzzle</button>
+  </div>
+  <dialog class="success-modal" id="lock-destination" aria-labelledby="lock-success-title">
+   <h2 id="lock-success-title" tabindex="-1">Initializing</h2>
+   <p id="lock-percentage">0%</p>
+   <progress class="initialization-progress" id="lock-progress" max="100" value="0" aria-label="Initializing">0%</progress>
+  </dialog>
+  <dialog class="video-modal" id="lock-player" aria-label="Reindeer Games success video">
+   <video id="lock-video" controls playsinline preload="auto" src="videos/reindeer-games-success.mp4"></video>
+   <div class="video-controls">
+    <button type="button" id="lock-play">Play fullscreen</button>
+    <button type="button" id="lock-close">Close video</button>
+   </div>
+   <p class="video-notice" id="lock-video-notice" role="status" hidden></p>
+  </dialog>
+  <p class="footnote text-center mb-0">Select eight symbols in order. Your final selection checks the lock.</p>
+  <noscript>This puzzle needs JavaScript enabled in your browser.</noscript>
+ </main>
+</div>
+<script>
+/* EDIT THIS CONFIGURATION. IDs are case-sensitive. No additional JavaScript libraries needed. */
+const LOCK_CONFIG = {
+  // Demo answer; replace with the order revealed by your escape-room clues.
+  // Exactly eight entries; repeated symbols are allowed.
+  sequence: ['dasher', 'dancer', 'prancer', 'vixen', 'comet', 'cupid', 'donner', 'blitzen'],
+  initializationMs: 5000,
+  images: [
+    { id: 'cupid',   src: 'images/cupid.png' },
+    { id: 'blitzen', src: 'images/blitzen.png' },
+    { id: 'prancer', src: 'images/prancer.png' },
+    { id: 'donner',  src: 'images/donner.png' },
+    { id: 'dasher',  src: 'images/dasher.png' },
+    { id: 'comet',   src: 'images/comet.png' },
+    { id: 'vixen',   src: 'images/vixen.png' },
+    { id: 'dancer',  src: 'images/dancer.png' }
+  ]
+};
+
+(() => {
+ 'use strict';
+ const root = document.getElementById('reindeer-lock');
+ const find = id => root.querySelector('#lock-' + id);
+ const status = find('status'), slots = find('slots'), keypad = find('keypad');
+ const undo = find('undo'), clear = find('clear'), reset = find('reset');
+ const destination = find('destination'), progress = find('progress'), percentage = find('percentage');
+ const player = find('player'), video = find('video'), notice = find('video-notice');
+ let entry = [], solved = false, failed = false, timer = null, countdown = null;
+ let ownedFullscreen = false;
+ function announce(message, kind = '') {status.textContent = message; status.className = 'status ' + kind;}
+ function graphic(item) {
+  const img = document.createElement('img');
+  img.src = item.src;
+  img.alt = ''; // Button and slot already have accessible names.
+  img.draggable = false;
+  img.decoding = 'async';
+  img.addEventListener('error', () => {
+   const fallback = document.createElement('span');
+   fallback.className = 'icon-fallback';
+   fallback.textContent = item.name.charAt(0);
+   fallback.setAttribute('aria-hidden', 'true');
+   img.replaceWith(fallback);
+  }, {once:true});
+  return img;
+ }
+ function render() {
+  slots.replaceChildren();
+  for (let i = 0; i < 8; i++) {
+   const li = document.createElement('li'), item = LOCK_CONFIG.images.find(x => x.id === entry[i]);
+   li.className = 'slot' + (item ? ' filled' : '');
+   li.setAttribute('aria-label', 'Position ' + (i + 1) + ': ' + (item ? item.name : 'empty'));
+   if (item) li.append(graphic(item)); else {const n=document.createElement('span'); n.textContent=i+1; n.setAttribute('aria-hidden','true'); li.append(n);}
+   slots.append(li);
+  }
+  undo.disabled = clear.disabled = solved || entry.length === 0;
+  keypad.querySelectorAll('button').forEach(button => button.disabled = solved || entry.length === 8);
+ }
+ function select(id) {
+  if (solved || entry.length >= 8) return;
+  entry.push(id); failed = false;
+  if (entry.length === 8) {
+   solved = entry.every((value, i) => value === LOCK_CONFIG.sequence[i]);
+   failed = !solved;
+   announce(solved ? '' : 'That order did not open the lock. Undo to change the last symbol, or Clear to try again.', solved ? 'success' : 'error');
+   render();
+   if (solved) {
+    destination.showModal();
+    find('success-title').focus();
+    setProgress(0);
+    // Request fullscreen during the player's final click, before activation expires.
+    requestFullscreen();
+    const start = performance.now();
+    countdown = setInterval(() => setProgress(Math.min(99, Math.floor((performance.now() - start) / LOCK_CONFIG.initializationMs * 100))), 50);
+    timer = setTimeout(() => {
+     clearInterval(countdown); countdown = null;
+     setProgress(100);
+     // Let the completed bar paint before replacing it with the video.
+     countdown = requestAnimationFrame(() => {
+      countdown = requestAnimationFrame(() => {
+       if (!solved) return;
+       destination.close(); player.showModal();
+       find('close').focus();
+       playVideo();
+      });
+     });
+    }, LOCK_CONFIG.initializationMs);
+   } else undo.focus();
+  } else { announce(entry.length + ' of 8 symbols selected. Choose symbol ' + (entry.length + 1) + '.'); render(); }
+ }
+ function setProgress(value) {
+  progress.value = value; progress.textContent = percentage.textContent = value + '%';
+ }
+ async function requestFullscreen() {
+  if (document.fullscreenElement || !document.documentElement.requestFullscreen) return;
+  try {
+   await document.documentElement.requestFullscreen();
+   ownedFullscreen = true;
+   if (!solved) releaseFullscreen();
+  } catch (_) { /* The viewport player remains available if fullscreen is denied. */ }
+ }
+ function releaseFullscreen() {
+  if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
+  if (ownedFullscreen && document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  ownedFullscreen = false;
+ }
+ async function playVideo() {
+  notice.hidden = true;
+  if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {});
+  try { await video.play(); }
+  catch (_) {
+   if (!player.open) return;
+   notice.textContent = 'Tap Play fullscreen to start the video. Turn your device sideways for landscape viewing.';
+   notice.hidden = false;
+  }
+ }
+ function closeVideo() {
+  video.pause();
+  if (player.open) player.close();
+  releaseFullscreen(); reset.focus();
+ }
+ function empty(resetAll) {
+  clearTimeout(timer); clearInterval(countdown); cancelAnimationFrame(countdown); timer = countdown = null;
+  closeVideo(); video.currentTime = 0;
+  if (destination.open) destination.close();
+  entry = []; failed = false;
+  if (resetAll) solved = false;
+  announce('Sequence cleared. Select the first symbol to begin.'); render(); keypad.querySelector('button').focus();
+ }
+ try {
+  const ids = LOCK_CONFIG.images.map(x => x.id);
+  if (ids.length !== 8 || new Set(ids).size !== 8 || LOCK_CONFIG.sequence.length !== 8 || !LOCK_CONFIG.sequence.every(id => ids.includes(id))) throw Error('Use eight unique image IDs and an answer containing exactly eight valid IDs.');
+  if (!Number.isFinite(LOCK_CONFIG.initializationMs) || LOCK_CONFIG.initializationMs <= 0) throw Error('initializationMs must be positive.');
+  LOCK_CONFIG.images.forEach(item => {
+   item.name = item.name || item.id.charAt(0).toUpperCase() + item.id.slice(1);
+   const column = document.createElement('div'); column.className = 'col';
+   const button = document.createElement('button'); button.type='button'; button.className='key';
+   button.setAttribute('aria-label', 'Select ' + item.name); button.dataset.symbol = item.id;
+   const label = document.createElement('span'); label.textContent=item.name;
+   button.append(graphic(item), label); button.addEventListener('click', () => select(item.id)); column.append(button); keypad.append(column);
+  });
+  undo.addEventListener('click', () => {if(solved || !entry.length)return; entry.pop(); failed=false; announce(entry.length + ' of 8 symbols selected. Choose symbol ' + (entry.length + 1) + '.'); render(); keypad.querySelector('button').focus();});
+  find('play').addEventListener('click', () => {
+   requestFullscreen();
+   if (video.webkitEnterFullscreen && !document.documentElement.requestFullscreen) video.webkitEnterFullscreen();
+   playVideo();
+  });
+  find('close').addEventListener('click', closeVideo);
+  player.addEventListener('cancel', event => {event.preventDefault(); closeVideo();});
+  video.addEventListener('error', () => {
+   notice.textContent = 'The video could not be loaded. Please reload the page and try again.';
+   notice.hidden = false;
+  });
+  destination.addEventListener('cancel', () => empty(true));
+  clear.addEventListener('click', () => empty(false)); reset.addEventListener('click', () => empty(true));
+  render();
+ } catch (error) {announce('Puzzle configuration error: ' + error.message, 'error'); undo.disabled=clear.disabled=reset.disabled=true;}
+})();
+</script>
+</body>
+</html>
