@@ -45,7 +45,6 @@ body{margin:0}
 .reindeer-lock .key img,.reindeer-lock .slot img{filter:brightness(0) saturate(100%) invert(87%) sepia(27%) saturate(716%) hue-rotate(339deg) brightness(96%) contrast(90%)}
 .reindeer-lock .icon-fallback{display:grid;place-items:center;width:55px;height:55px;color:var(--gold);font:40px Georgia,serif}
 .reindeer-lock .slot .icon-fallback{width:34px;height:34px;font-size:25px}
-.reindeer-lock .key span:last-child{font-size:.88rem;line-height:1.25}
 .reindeer-lock :focus-visible{outline:3px solid #ffe3a5;outline-offset:3px}
 .reindeer-lock button:disabled{opacity:.5;cursor:default}
 .reindeer-lock .actions button,.reindeer-lock .continue{display:inline-flex;align-items:center;justify-content:center;padding:10px 17px;border-radius:9px;border:1px solid #688270;background:transparent;color:var(--cream);min-height:44px;line-height:1.35;text-decoration:none}
@@ -58,9 +57,16 @@ body{margin:0}
 .initialization-progress{width:100%;height:20px;accent-color:#e9c783}
 .reindeer-lock .video-modal{position:fixed;inset:0;width:100vw;max-width:none;height:100dvh;max-height:none;margin:0;padding:0;border:0;background:#000;color:#fff}
 .video-modal::backdrop{background:#000}
+.video-modal{overflow:hidden}
+.video-stage{position:absolute;inset:0;width:100%;height:100%}
+/* Rotate the entire player on portrait phones if native orientation locking is unavailable. */
+@media(orientation:portrait) and (pointer:coarse){
+ .video-stage{inset:auto;left:50%;top:50%;width:100dvh;height:100vw;transform:translate(-50%,-50%) rotate(90deg)}
+}
 .video-modal video{display:block;width:100%;height:100%;object-fit:contain;background:#000}
 .video-controls{position:absolute;top:16px;right:16px;display:flex;gap:10px;z-index:1}
-.video-controls button{background:#102f29;color:#fff5dc;border:1px solid #e9c783;border-radius:8px;padding:10px 16px;min-height:44px}
+.video-controls button{display:grid;place-items:center;width:48px;height:48px;padding:10px;background:#102f29;color:#e9c783;border:1px solid #e9c783;border-radius:50%;box-shadow:0 2px 12px #0006}
+.video-controls button:hover{background:#21483b;color:#fff5dc}
 .video-notice{position:absolute;left:16px;bottom:70px;max-width:calc(100% - 32px);background:#102f29;color:#fff5dc;padding:12px;border-radius:8px}
 .reindeer-lock [hidden]{display:none!important}
 .reindeer-lock .footnote{font-size:.78rem;color:var(--muted);margin:24px 0 0}
@@ -92,12 +98,13 @@ body{margin:0}
    <progress class="initialization-progress" id="lock-progress" max="100" value="0" aria-label="Initializing">0%</progress>
   </dialog>
   <dialog class="video-modal" id="lock-player" aria-label="Reindeer Games success video">
-   <video id="lock-video" controls playsinline preload="auto" src="videos/reindeer-games-success.mp4"></video>
+   <div class="video-stage">
+   <video id="lock-video" controls playsinline tabindex="0" preload="auto" src="videos/reindeer-games-success.mp4"></video>
    <div class="video-controls">
-    <button type="button" id="lock-play">Play fullscreen</button>
-    <button type="button" id="lock-close">Close video</button>
+    <button type="button" id="lock-close" aria-label="Close video" hidden><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
    </div>
    <p class="video-notice" id="lock-video-notice" role="status" hidden></p>
+   </div>
   </dialog>
   <p class="footnote text-center mb-0">Select eight symbols in order. Your final selection checks the lock.</p>
   <noscript>This puzzle needs JavaScript enabled in your browser.</noscript>
@@ -132,6 +139,8 @@ const LOCK_CONFIG = {
  const player = find('player'), video = find('video'), notice = find('video-notice');
  let entry = [], solved = false, failed = false, timer = null, countdown = null;
  let ownedFullscreen = false;
+ const closeButton = find('close');
+ let closeTimer = null;
  function announce(message, kind = '') {status.textContent = message; status.className = 'status ' + kind;}
  function graphic(item) {
   const img = document.createElement('img');
@@ -184,7 +193,8 @@ const LOCK_CONFIG = {
       countdown = requestAnimationFrame(() => {
        if (!solved) return;
        destination.close(); player.showModal();
-       find('close').focus();
+       closeButton.hidden = true;
+       video.focus();
        playVideo();
       });
      });
@@ -201,6 +211,7 @@ const LOCK_CONFIG = {
    await document.documentElement.requestFullscreen();
    ownedFullscreen = true;
    if (!solved) releaseFullscreen();
+   else if (player.open) lockLandscape();
   } catch (_) { /* The viewport player remains available if fullscreen is denied. */ }
  }
  function releaseFullscreen() {
@@ -208,17 +219,22 @@ const LOCK_CONFIG = {
   if (ownedFullscreen && document.fullscreenElement) document.exitFullscreen().catch(() => {});
   ownedFullscreen = false;
  }
+ function lockLandscape() {
+  if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {});
+ }
  async function playVideo() {
   notice.hidden = true;
-  if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {});
+  lockLandscape();
   try { await video.play(); }
   catch (_) {
    if (!player.open) return;
-   notice.textContent = 'Tap Play fullscreen to start the video. Turn your device sideways for landscape viewing.';
+   notice.textContent = 'Tap the video’s play control to start.';
    notice.hidden = false;
   }
  }
  function closeVideo() {
+  clearTimeout(closeTimer); closeTimer = null;
+  closeButton.hidden = true;
   video.pause();
   if (player.open) player.close();
   releaseFullscreen(); reset.focus();
@@ -240,14 +256,16 @@ const LOCK_CONFIG = {
    const column = document.createElement('div'); column.className = 'col';
    const button = document.createElement('button'); button.type='button'; button.className='key';
    button.setAttribute('aria-label', 'Select ' + item.name); button.dataset.symbol = item.id;
-   const label = document.createElement('span'); label.textContent=item.name;
-   button.append(graphic(item), label); button.addEventListener('click', () => select(item.id)); column.append(button); keypad.append(column);
+   button.append(graphic(item)); button.addEventListener('click', () => select(item.id)); column.append(button); keypad.append(column);
   });
   undo.addEventListener('click', () => {if(solved || !entry.length)return; entry.pop(); failed=false; announce(entry.length + ' of 8 symbols selected. Choose symbol ' + (entry.length + 1) + '.'); render(); keypad.querySelector('button').focus();});
-  find('play').addEventListener('click', () => {
-   requestFullscreen();
-   if (video.webkitEnterFullscreen && !document.documentElement.requestFullscreen) video.webkitEnterFullscreen();
-   playVideo();
+  video.addEventListener('playing', () => {notice.hidden = true;});
+  video.addEventListener('ended', () => {
+   if (!player.open || !closeButton.hidden || closeTimer !== null) return;
+   closeTimer = setTimeout(() => {
+    closeTimer = null;
+    if (player.open) closeButton.hidden = false;
+   }, 3000);
   });
   find('close').addEventListener('click', closeVideo);
   player.addEventListener('cancel', event => {event.preventDefault(); closeVideo();});
